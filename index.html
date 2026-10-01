@@ -3,818 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hotel Erlang - Sistem Parkir</title>
+    <title>Kalkulator Interaktif</title>
 
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
-    <!-- Library untuk Export Excel -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+
+            background: linear-gradient(
+                120deg,
+                #111827,
+                #312e81,
+                #7c3aed,
+                #0f766e,
+                #111827
+            );
+
+            background-size: 400% 400%;
+            animation: backgroundGerak 12s ease infinite;
+        }
+
+        /* ANIMASI BACKGROUND */
+        @keyframes backgroundGerak {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* LINGKARAN BACKGROUND */
+        .lingkaran {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(5px);
+            opacity: 0.35;
+            animation: melayang 6s ease-in-out infinite;
+        }
+
+        .lingkaran.satu {
+            width: 250px;
+            height: 250px;
+            background: #06b6d4;
+            top: 5%;
+            left: 8%;
+        }
+
+        .lingkaran.dua {
+            width: 300px;
+            height: 300px;
+            background: #ec4899;
+            right: 5%;
+            bottom: 5%;
+            animation-delay: 1s;
+        }
+
+        .lingkaran.tiga {
+            width: 150px;
+            height: 150px;
+            background: #facc15;
+            right: 30%;
+            top: 10%;
+            animation-delay: 2s;
+        }
+
+        @keyframes melayang {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+
+            50% {
+                transform: translateY(-30px) scale(1.15);
+            }
+        }
+
+        /* KALKULATOR */
+        .calculator {
+            position: relative;
+            z-index: 5;
+
+            width: 370px;
+            padding: 22px;
+
+            border-radius: 30px;
+
+            background: rgba(15, 23, 42, 0.88);
+
+            border: 1px solid rgba(255,255,255,0.15);
+
+            box-shadow:
+                0 30px 80px rgba(0,0,0,0.45),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+
+            backdrop-filter: blur(20px);
+
+            animation: muncul 0.8s ease;
+        }
+
+        @keyframes muncul {
+            from {
+                opacity: 0;
+                transform: scale(0.7) translateY(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .judul {
+            color: white;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .judul h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+        }
+
+        .judul p {
+            color: #94a3b8;
+            font-size: 12px;
+        }
+
+        /* LAYAR */
+        .display {
+            padding: 20px;
+            margin-bottom: 18px;
+
+            border-radius: 20px;
+
+            background: rgba(2, 6, 23, 0.85);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            text-align: right;
+
+            box-shadow:
+                inset 0 0 20px rgba(0,0,0,0.4);
+        }
+
+        .riwayat {
+            height: 25px;
+            color: #64748b;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .angka {
+            color: white;
+            font-size: 38px;
+            font-weight: bold;
+            min-height: 48px;
+
+            word-break: break-all;
+
+            transition: 0.2s;
+        }
+
+        .angka.berubah {
+            animation: angkaPop 0.25s ease;
+        }
+
+        @keyframes angkaPop {
+            0% {
+                transform: scale(1);
+                color: white;
+            }
+
+            50% {
+                transform: scale(1.12);
+                color: #22d3ee;
+            }
+
+            100% {
+                transform: scale(1);
+                color: white;
+            }
+        }
+
+        /* PENJELASAN */
+        .penjelasan {
+            margin-top: 10px;
+            padding: 10px;
+
+            border-radius: 12px;
+
+            color: #cbd5e1;
+            background: rgba(255,255,255,0.05);
+
+            font-size: 12px;
+            text-align: center;
+
+            min-height: 34px;
+
+            transition: 0.3s;
+        }
+
+        /* TOMBOL */
+        .tombol {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            height: 65px;
+
+            border: none;
+            border-radius: 18px;
+
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            background: rgba(255,255,255,0.08);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            box-shadow:
+                0 6px 15px rgba(0,0,0,0.2);
+
+            transition:
+                transform 0.15s,
+                background 0.3s,
+                box-shadow 0.3s;
+        }
+
+        /* EFEK KETIKA DISENTUH */
+        button:hover {
+            background: rgba(255,255,255,0.18);
+            transform: translateY(-3px);
+        }
+
+        button:active,
+        button.aktif {
+            transform: scale(0.88);
+
+            background: #22d3ee;
+
+            box-shadow:
+                0 0 25px #22d3ee;
+
+            animation: tombolWarna 0.4s ease;
+        }
+
+        @keyframes tombolWarna {
+            0% {
+                background: #22d3ee;
+            }
+
+            50% {
+                background: #a855f7;
+            }
+
+            100% {
+                background: #22d3ee;
+            }
+        }
+
+        /* OPERATOR */
+        .operator {
+            background: rgba(139, 92, 246, 0.35);
+        }
+
+        .operator:hover {
+            background: rgba(168, 85, 247, 0.65);
+        }
+
+        /* AC */
+        .hapus {
+            background: rgba(239, 68, 68, 0.35);
+        }
+
+        /* SAMA DENGAN */
+        .hasil {
+            background: linear-gradient(
+                135deg,
+                #06b6d4,
+                #8b5cf6,
+                #ec4899
+            );
+
+            background-size: 200% 200%;
+
+            animation: warnaHasil 4s ease infinite;
+        }
+
+        @keyframes warnaHasil {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 11px;
+            margin-top: 15px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 450px) {
+            .calculator {
+                width: 92%;
+                padding: 18px;
+            }
+
+            button {
+                height: 58px;
+            }
+
+            .angka {
+                font-size: 32px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!-- ================= LOGIN ================= -->
-    <section id="loginPage" class="login-page">
+    <!-- BACKGROUND ANIMASI -->
+    <div class="lingkaran satu"></div>
+    <div class="lingkaran dua"></div>
+    <div class="lingkaran tiga"></div>
 
-        <div class="login-background"></div>
+    <!-- KALKULATOR -->
+    <div class="calculator">
 
-        <div class="login-card">
+        <div class="judul">
+            <h1>🧮 Kalkulator Interaktif</h1>
+            <p>Klik angka dan lihat efeknya</p>
+        </div>
 
-            <div class="hotel-logo">
-                <div class="logo-icon">✦</div>
-                <h1>HOTEL ERLANG</h1>
-                <p>Parking Management System</p>
+        <!-- DISPLAY -->
+        <div class="display">
+
+            <div id="riwayat" class="riwayat">
+                Siap menghitung...
             </div>
 
-            <form id="loginForm">
+            <div id="angka" class="angka">
+                0
+            </div>
 
-                <div class="input-group">
-                    <label>Username</label>
-                    <div class="input-box">
-                        <span>👤</span>
-                        <input
-                            type="text"
-                            id="username"
-                            placeholder="Masukkan username"
-                            autocomplete="off"
-                            required
-                        >
-                    </div>
-                </div>
-
-                <div class="input-group">
-                    <label>Password</label>
-                    <div class="input-box">
-                        <span>🔒</span>
-                        <input
-                            type="password"
-                            id="password"
-                            placeholder="Masukkan password"
-                            required
-                        >
-                        <button type="button" id="showPassword">👁</button>
-                    </div>
-                </div>
-
-                <button type="submit" class="login-button">
-                    <span>Masuk ke Dashboard</span>
-                    <span>→</span>
-                </button>
-
-                <p id="loginError" class="login-error"></p>
-
-            </form>
-
-            <div class="login-footer">
-                <span>🔐 Admin Access</span>
-                <span>Hotel Erlang © 2026</span>
+            <div id="penjelasan" class="penjelasan">
+                Masukkan angka untuk memulai
             </div>
 
         </div>
-    </section>
 
-
-    <!-- ================= APLIKASI ================= -->
-    <section id="appPage" class="app-page hidden">
-
-        <!-- SIDEBAR -->
-        <aside class="sidebar">
-
-            <div class="sidebar-logo">
-                <div class="small-logo">✦</div>
-                <div>
-                    <strong>HOTEL ERLANG</strong>
-                    <small>Parking System</small>
-                </div>
-            </div>
-
-            <div class="admin-profile">
-                <div class="avatar">D</div>
-                <div>
-                    <strong>Deno</strong>
-                    <small>Administrator</small>
-                </div>
-                <span class="online-dot"></span>
-            </div>
-
-            <nav class="menu">
-
-                <button class="menu-item active" data-page="dashboard">
-                    <span>▣</span>
-                    Dashboard
-                </button>
-
-                <button class="menu-item" data-page="rental">
-                    <span>🚗</span>
-                    Penyewaan Parkir
-                </button>
-
-                <button class="menu-item" data-page="payment">
-                    <span>💳</span>
-                    Pembayaran
-                </button>
-
-                <button class="menu-item" data-page="history">
-                    <span>▤</span>
-                    Riwayat Transaksi
-                </button>
-
-            </nav>
-
-            <div class="sidebar-bottom">
-
-                <div class="system-status">
-                    <span class="status-circle"></span>
-                    Sistem Online
-                </div>
-
-                <button id="logoutButton" class="logout-button">
-                    <span>↪</span>
-                    Keluar
-                </button>
-
-            </div>
-
-        </aside>
-
-
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-
-            <!-- TOPBAR -->
-            <header class="topbar">
-
-                <div>
-                    <div class="breadcrumb">Hotel Erlang / <span id="breadcrumbPage">Dashboard</span></div>
-                    <h2 id="pageTitle">Dashboard</h2>
-                </div>
-
-                <div class="topbar-right">
-
-                    <div class="current-time">
-                        <span>🕐</span>
-                        <span id="currentTime">--:--:--</span>
-                    </div>
-
-                    <div class="notification">
-                        🔔
-                        <span></span>
-                    </div>
-
-                    <div class="top-avatar">D</div>
-
-                </div>
-
-            </header>
-
-
-            <!-- ================= DASHBOARD ================= -->
-            <section id="dashboardPage" class="content-page">
-
-                <div class="welcome-card">
-
-                    <div>
-                        <p class="welcome-small">SELAMAT DATANG KEMBALI 👋</p>
-                        <h1>Dashboard Hotel Erlang</h1>
-                        <p>
-                            Kelola seluruh aktivitas parkir hotel dengan mudah
-                            melalui sistem ini.
-                        </p>
-                    </div>
-
-                    <div class="welcome-icon">🏨</div>
-
-                </div>
-
-
-                <div class="stat-grid">
-
-                    <div class="stat-card blue">
-                        <div class="stat-icon">🚗</div>
-                        <div>
-                            <span>Total Kendaraan</span>
-                            <strong id="totalVehicles">0</strong>
-                            <small>Semua transaksi</small>
-                        </div>
-                    </div>
-
-                    <div class="stat-card green">
-                        <div class="stat-icon">🅿️</div>
-                        <div>
-                            <span>Parkir Aktif</span>
-                            <strong id="activeParking">0</strong>
-                            <small>Sedang berada di area</small>
-                        </div>
-                    </div>
-
-                    <div class="stat-card orange">
-                        <div class="stat-icon">💰</div>
-                        <div>
-                            <span>Pendapatan</span>
-                            <strong id="totalIncome">Rp 0</strong>
-                            <small>Total pembayaran</small>
-                        </div>
-                    </div>
-
-                    <div class="stat-card purple">
-                        <div class="stat-icon">🎫</div>
-                        <div>
-                            <span>Transaksi</span>
-                            <strong id="totalTransactions">0</strong>
-                            <small>Transaksi tersimpan</small>
-                        </div>
-                    </div>
-
-                </div>
-
-
-                <div class="dashboard-grid">
-
-                    <div class="panel quick-panel">
-
-                        <div class="panel-header">
-                            <div>
-                                <h3>Akses Cepat</h3>
-                                <p>Pilih menu yang ingin digunakan</p>
-                            </div>
-                        </div>
-
-                        <div class="quick-actions">
-
-                            <button class="quick-button" data-page="rental">
-                                <span class="quick-icon blue-bg">🚗</span>
-                                <div>
-                                    <strong>Parkir Baru</strong>
-                                    <small>Daftarkan kendaraan</small>
-                                </div>
-                                <span>→</span>
-                            </button>
-
-                            <button class="quick-button" data-page="payment">
-                                <span class="quick-icon green-bg">💳</span>
-                                <div>
-                                    <strong>Pembayaran</strong>
-                                    <small>Bayar transaksi</small>
-                                </div>
-                                <span>→</span>
-                            </button>
-
-                            <button class="quick-button" data-page="history">
-                                <span class="quick-icon purple-bg">📊</span>
-                                <div>
-                                    <strong>Riwayat</strong>
-                                    <small>Lihat transaksi</small>
-                                </div>
-                                <span>→</span>
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel parking-panel">
-
-                        <div class="panel-header">
-                            <div>
-                                <h3>Status Slot Parkir</h3>
-                                <p>Kondisi area parkir saat ini</p>
-                            </div>
-                        </div>
-
-                        <div id="parkingStatus" class="parking-slots"></div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="panel recent-panel">
-
-                    <div class="panel-header">
-                        <div>
-                            <h3>Transaksi Terbaru</h3>
-                            <p>Aktivitas parkir terbaru</p>
-                        </div>
-
-                        <button class="text-button" data-page="history">
-                            Lihat Semua →
-                        </button>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Kode Tiket</th>
-                                    <th>Plat Nomor</th>
-                                    <th>Kendaraan</th>
-                                    <th>Waktu Masuk</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="recentTransactions"></tbody>
-                        </table>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- ================= RENTAL ================= -->
-            <section id="rentalPage" class="content-page hidden">
-
-                <div class="section-heading">
-                    <div>
-                        <p class="section-label">TRANSAKSI BARU</p>
-                        <h1>Penyewaan Parkir</h1>
-                        <p>Daftarkan kendaraan yang akan memasuki area parkir Hotel Erlang.</p>
-                    </div>
-
-                    <div class="step-indicator">
-                        <span class="step active">1</span>
-                        <i></i>
-                        <span class="step active">2</span>
-                        <i></i>
-                        <span class="step">3</span>
-                    </div>
-                </div>
-
-
-                <div class="form-layout">
-
-                    <div class="panel form-panel">
-
-                        <div class="panel-title">
-                            <span class="title-number">01</span>
-                            <div>
-                                <h3>Informasi Kendaraan</h3>
-                                <p>Masukkan data kendaraan</p>
-                            </div>
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Tipe Kendaraan</label>
-
-                            <div class="vehicle-options">
-
-                                <label class="vehicle-card">
-
-                                    <input
-                                        type="radio"
-                                        name="vehicleType"
-                                        value="Motor"
-                                        checked
-                                    >
-
-                                    <div class="vehicle-content">
-                                        <span class="vehicle-icon">🏍️</span>
-                                        <div>
-                                            <strong>Motor</strong>
-                                            <small>Rp 5.000 / jam</small>
-                                        </div>
-                                    </div>
-
-                                    <span class="check-mark">✓</span>
-
-                                </label>
-
-
-                                <label class="vehicle-card">
-
-                                    <input
-                                        type="radio"
-                                        name="vehicleType"
-                                        value="Mobil"
-                                    >
-
-                                    <div class="vehicle-content">
-                                        <span class="vehicle-icon">🚗</span>
-                                        <div>
-                                            <strong>Mobil</strong>
-                                            <small>Rp 10.000 / jam</small>
-                                        </div>
-                                    </div>
-
-                                    <span class="check-mark">✓</span>
-
-                                </label>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label for="plateNumber">Plat Nomor Kendaraan</label>
-
-                            <input
-                                type="text"
-                                id="plateNumber"
-                                class="form-input plate-input"
-                                placeholder="Contoh: BK 1234 AB"
-                                maxlength="12"
-                            >
-
-                            <small class="input-help">
-                                Masukkan nomor plat sesuai kendaraan.
-                            </small>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Kategori Tamu</label>
-
-                            <div class="guest-options">
-
-                                <label class="guest-card">
-
-                                    <input
-                                        type="radio"
-                                        name="guestType"
-                                        value="Menginap"
-                                        checked
-                                    >
-
-                                    <div>
-                                        <span>🏨</span>
-                                        <strong>Menginap</strong>
-                                        <small>Gratis / termasuk fasilitas</small>
-                                    </div>
-
-                                </label>
-
-
-                                <label class="guest-card">
-
-                                    <input
-                                        type="radio"
-                                        name="guestType"
-                                        value="Non-Menginap"
-                                    >
-
-                                    <div>
-                                        <span>👤</span>
-                                        <strong>Non-Menginap</strong>
-                                        <small>Tarif normal</small>
-                                    </div>
-
-                                </label>
-
-
-                                <label class="guest-card">
-
-                                    <input
-                                        type="radio"
-                                        name="guestType"
-                                        value="VIP"
-                                    >
-
-                                    <div>
-                                        <span>⭐</span>
-                                        <strong>VIP</strong>
-                                        <small>Prioritas khusus</small>
-                                    </div>
-
-                                </label>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="form-group">
-
-                            <label>Pilih Slot Parkir</label>
-
-                            <div id="rentalSlots" class="slot-selection"></div>
-
-                        </div>
-
-
-                        <div class="form-actions">
-
-                            <button id="resetRental" class="secondary-button">
-                                Reset
-                            </button>
-
-                            <button id="createTicket" class="primary-button">
-                                🎫 Buat Tiket Parkir
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="panel info-panel">
-
-                        <div class="info-header">
-                            <span>💡</span>
-                            <div>
-                                <h3>Informasi Parkir</h3>
-                                <p>Peraturan dan tarif</p>
-                            </div>
-                        </div>
-
-                        <div class="tariff-list">
-
-                            <div>
-                                <span>🏍️</span>
-                                <div>
-                                    <strong>Motor</strong>
-                                    <small>Rp 5.000 / jam</small>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span>🚗</span>
-                                <div>
-                                    <strong>Mobil</strong>
-                                    <small>Rp 10.000 / jam</small>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span>🏨</span>
-                                <div>
-                                    <strong>Tamu Menginap</strong>
-                                    <small>Gratis / Included</small>
-                                </div>
-                            </div>
-
-                            <div>
-                                <span>⭐</span>
-                                <div>
-                                    <strong>VIP</strong>
-                                    <small>Diskon 20%</small>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="info-warning">
-                            <strong>⚠ Perhatian</strong>
-                            <p>
-                                Pastikan plat nomor dan tipe kendaraan
-                                sudah benar sebelum membuat tiket.
-                            </p>
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- ================= PAYMENT ================= -->
-            <section id="paymentPage" class="content-page hidden">
-
-                <div class="section-heading">
-
-                    <div>
-                        <p class="section-label">TRANSAKSI</p>
-                        <h1>Pembayaran Parkir</h1>
-                        <p>Cari tiket berdasarkan kode tiket atau plat nomor.</p>
-                    </div>
-
-                </div>
-
-
-                <div class="payment-search panel">
-
-                    <div class="search-icon">🔎</div>
-
-                    <div class="search-input-container">
-
-                        <label>Cari Tiket / Plat Nomor</label>
-
-                        <div class="search-row">
-
-                            <input
-                                type="text"
-                                id="paymentSearch"
-                                class="form-input"
-                                placeholder="Contoh: TKT-20261001-001 atau BK 1234 AB"
-                            >
-
-                            <button id="searchPayment" class="primary-button">
-                                Cari Data
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div id="paymentResult" class="hidden"></div>
-
-            </section>
-
-
-            <!-- ================= HISTORY ================= -->
-            <section id="historyPage" class="content-page hidden">
-
-                <div class="section-heading">
-
-                    <div>
-                        <p class="section-label">DATA TRANSAKSI</p>
-                        <h1>Riwayat Transaksi</h1>
-                        <p>Kelola dan export seluruh transaksi parkir.</p>
-                    </div>
-
-                    <button id="exportExcel" class="excel-button">
-                        📥 Export Excel
-                    </button>
-
-                </div>
-
-
-                <div class="history-stats">
-
-                    <div>
-                        <span>Total Data</span>
-                        <strong id="historyTotal">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Sudah Bayar</span>
-                        <strong id="historyPaid">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Belum Bayar</span>
-                        <strong id="historyUnpaid">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Pendapatan</span>
-                        <strong id="historyIncome">Rp 0</strong>
-                    </div>
-
-                </div>
-
-
-                <div class="panel history-panel">
-
-                    <div class="history-toolbar">
-
-                        <div class="history-search">
-                            🔎
-                            <input
-                                type="text"
-                                id="historySearch"
-                                placeholder="Cari kode tiket atau plat..."
-                            >
-                        </div>
-
-                        <select id="historyFilter" class="filter-select">
-                            <option value="all">Semua Status</option>
-                            <option value="active">Aktif</option>
-                            <option value="paid">Sudah Bayar</option>
-                        </select>
-
-                    </div>
-
-
-                    <div class="table-wrapper">
-
-                        <table id="historyTable">
-
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Kode Tiket</th>
-                                    <th>Plat Nomor</th>
-                                    <th>Kendaraan</th>
-                                    <th>Tamu</th>
-                                    <th>Slot</th>
-                                    <th>Masuk</th>
-                                    <th>Keluar</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="historyTableBody"></tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        </main>
-
-    </section>
-
-
-    <!-- ================= TICKET MODAL ================= -->
-    <div id="ticketModal" class="modal hidden">
-
-        <div class="modal-overlay"></div>
-
-        <div class="ticket-modal">
-
-            <button class="modal-close" id="closeTicketModal">×</button>
-
-            <div class="ticket-success">
-                <div>✓</div>
-                <h2>Tiket Berhasil Dibuat!</h2>
-                <p>Kendaraan berhasil terdaftar di sistem.</p>
-            </div>
-
-            <div id="ticketPrintArea" class="ticket-paper">
-
-                <div class="ticket-header">
-                    <div class="ticket-logo">✦</div>
-                    <div>
-                        <h3>HOTEL ERLANG</h3>
-                        <p>PARKING TICKET</p>
-                    </div>
-                </div>
-
-                <div class="ticket-code">
-                    <small>KODE TIKET</small>
-                    <strong id="generatedTicketCode">TKT-000000</strong>
-                </div>
-
-                <div class="ticket-details">
-
-                    <div>
-                        <span>Plat Nomor</span>
-                        <strong id="ticketPlate">-</strong>
-                    </div>
-
-                    <div>
-                        <span>Kendaraan</span>
-                        <strong id="ticketVehicle">-</strong>
-                    </div>
-
-                    <div>
-                        <span>Kategori</span>
-                        <strong id="ticketGuest">-</strong>
-                    </div>
-
-                    <div>
-                        <span>Slot</span>
-                        <strong id="ticketSlot">-</strong>
-                    </div>
-
-                    <div>
-                        <span>Waktu Masuk</span>
-                        <strong id="ticketTime">-</strong>
-                    </div>
-
-                </div>
-
-                <div class="ticket-footer">
-                    Simpan tiket ini untuk proses pembayaran.
-                </div>
-
-            </div>
-
-            <div class="modal-actions">
-
-                <button id="printTicket" class="secondary-button">
-                    🖨 Cetak Tiket
-                </button>
-
-                <button id="closeTicket" class="primary-button">
-                    Selesai
-                </button>
-
-            </div>
-
+        <!-- TOMBOL -->
+        <div class="tombol">
+
+            <button class="hapus" data-value="C">C</button>
+            <button class="operator" data-value="⌫">⌫</button>
+            <button class="operator" data-value="%">%</button>
+            <button class="operator" data-value="/">÷</button>
+
+            <button data-value="7">7</button>
+            <button data-value="8">8</button>
+            <button data-value="9">9</button>
+            <button class="operator" data-value="*">×</button>
+
+            <button data-value="4">4</button>
+            <button data-value="5">5</button>
+            <button data-value="6">6</button>
+            <button class="operator" data-value="-">−</button>
+
+            <button data-value="1">1</button>
+            <button data-value="2">2</button>
+            <button data-value="3">3</button>
+            <button class="operator" data-value="+">+</button>
+
+            <button data-value="0">0</button>
+            <button data-value=".">.</button>
+            <button class="hasil" data-value="=">=</button>
+        </div>
+
+        <div class="footer">
+            Pustaka Coding • Kalkulator JavaScript
         </div>
 
     </div>
-
-
-    <!-- ================= TOAST ================= -->
-    <div id="toast" class="toast">
-
-        <span id="toastIcon">✓</span>
-
-        <div>
-            <strong id="toastTitle">Berhasil</strong>
-            <p id="toastMessage">Data berhasil diproses.</p>
-        </div>
-
-    </div>
-
 
     <script src="script.js"></script>
 
